@@ -1,0 +1,14 @@
+{
+  "chainId": 8453,
+  "network": "Base mainnet",
+  "contract": "AppleVault",
+  "address": "0xEB8E2ef433aa8dff78940E28049AFf8204866C6C",
+  "deploymentTransaction": "0x6abb863315b2ac06b278ca677ed7677ad7e91f43e6773f82d185970b082883bf",
+  "blockNumber": 55724053,
+  "asset": "0xb200000000000000000000C2e324d24d7eEcd1fb",
+  "reclaimDelaySeconds": 7776000,
+  "verification": "Receipt success, direct contract creation input matches locally compiled artifact, asset() matches AAPLc, bytecode exists; checked by scripts/verify-deployment.mjs",
+  "audit": "none",
+  "privacy": "public escrow; no zero-knowledge privacy",
+  "fee": "none"
+}

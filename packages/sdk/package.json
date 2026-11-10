@@ -1,0 +1,8 @@
+{
+  "name": "@privacy-stock/sdk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./note.mjs",
+  "dependencies": {"viem": "2.57.17"}
+}

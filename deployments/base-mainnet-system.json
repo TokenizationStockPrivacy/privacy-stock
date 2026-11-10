@@ -1,0 +1,28 @@
+{
+  "chainId": 8453,
+  "asset": "0xb200000000000000000000C2e324d24d7eEcd1fb",
+  "owner": "0x7e8ba8a0ed567e1e048d590c27f6e0ce8e90308f",
+  "feed": "0x787f13dEa48Db0897CbCDD985de77809D837F988",
+  "contracts": {
+    "FeeManager": {
+      "address": "0xb35Fd984913E99F82c53e47e1013075a187B6d28",
+      "transactionHash": "0x766a8de621fad6171474fc0dd26d20d382dc892bab86f17d925cf26702ff07b5",
+      "blockNumber": 55728155
+    },
+    "RewardsVault": {
+      "address": "0x7D317B61055D344c334901976ebAc10450566E6e",
+      "transactionHash": "0x0352c11be07e05168518e6eec9ac5aacd6603a8f6adbfbc1f628a8c84632a153",
+      "blockNumber": 55728197
+    },
+    "AppleFeeVault": {
+      "address": "0x8178B76de28E880bb1435346A4c227c0B92Bbecc",
+      "transactionHash": "0x166dc59413c8f6b1a572607ac72cf8c88852d0d504957b68e9c76b290f52504c",
+      "blockNumber": 55728261
+    }
+  },
+  "setCollector": {
+    "transactionHash": "0x110f650f84e3c611e4b60c05443c4a78a49944c89ea698a9c15c96198ad75ebc",
+    "blockNumber": 55728321
+  },
+  "verifiedAt": "2026-11-10T18:44:26.864Z"
+}
