@@ -29,6 +29,7 @@ export function Footer() {
             <li><a className="link" href="/LICENSE.txt" target="_blank" rel="noreferrer">MIT license</a></li>
             <li><a className="link" href="#open-source">Verification status</a></li>
             <li><a className="link" href="#security">Security and transparency</a></li>
+            <li><a className="link" href="/legacy-v1">Legacy V1 recovery</a></li>
           </ul>
           <p className="mt-6 break-all font-mono text-xs text-muted">Pool: {SPLIT_POOL_VAULT}</p>
         </div>

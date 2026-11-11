@@ -44,6 +44,7 @@ export const CONTRACTS = {
 } as const;
 
 export const APPLE_FEE_VAULT = CONTRACTS.AppleFeeVault.address;
+export const LEGACY_REWARDS_VAULT = CONTRACTS.RewardsVault.address;
 export const SPLIT_POOL_VAULT = CONTRACTS.SplitPoolVault.address;
 export const REWARDS_VAULT = CONTRACTS.RewardsVaultV2.address;
 export const FEE_MANAGER = CONTRACTS.FeeManager.address;
