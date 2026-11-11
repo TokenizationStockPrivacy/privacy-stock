@@ -56,6 +56,12 @@ export function TransferPanel() {
 
   const recipientError = recipientInput === '' || isAddress(recipientInput) ? '' : 'Enter a valid Base address (0x followed by 40 hex characters).';
   const noEligiblePosition = data.eligiblePrincipal === BigInt(0);
+  const pendingPrincipal = data.position?.pending ?? BigInt(0);
+  const pendingUnlockAt = data.position?.unlockAt ?? BigInt(0);
+  const pendingIsReady = pendingPrincipal > BigInt(0) && pendingUnlockAt <= BigInt(Math.floor(Date.now() / 1000));
+  const activationTime = pendingPrincipal > BigInt(0)
+    ? new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(Number(pendingUnlockAt) * 1000))
+    : '';
 
   function resetQuote() {
     setQuote(undefined);
@@ -207,7 +213,9 @@ export function TransferPanel() {
               connected={isConnected}
               error={amountError}
               hint={noEligiblePosition
-                ? 'Paused. Deposits resume once an Earn position is active.'
+                ? pendingPrincipal > BigInt(0)
+                  ? 'Paused until your pending Earn deposit is activated.'
+                  : 'Paused. Deposits resume once an Earn position is active.'
                 : `Up to ${AAPLC_DECIMALS} decimal places. The fee is taken from this amount.`}
               disabled={noEligiblePosition}
               onMax={() => resetQuote()}
@@ -234,7 +242,14 @@ export function TransferPanel() {
 
           {noEligiblePosition && (
             <p role="status" className="mt-4 rounded-lg border border-warn/40 bg-warn-bg p-3 text-xs text-ink">
-              No Earn position is eligible yet. Fee-charged deposits resume once at least one position is activated.
+              {pendingPrincipal > BigInt(0) ? (
+                <>
+                  Your <strong>{formatExact(pendingPrincipal)} AAPLc</strong> Earn deposit is {pendingIsReady ? 'ready to activate' : `pending until ${activationTime}`}.
+                  {' '}Go to <a className="link font-semibold" href="#earn">Earn</a> {pendingIsReady ? 'now' : 'after that time'} and click <strong>Activate eligible deposit</strong>. Transfers resume after the activation transaction confirms.
+                </>
+              ) : (
+                <>No Earn position is eligible yet. Deposit in <a className="link font-semibold" href="#earn">Earn</a>, wait 24 hours, then activate it.</>
+              )}
             </p>
           )}
 
