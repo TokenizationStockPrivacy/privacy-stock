@@ -19,7 +19,8 @@ type Deployment = {
   collectorTx?: Hash;
 };
 
-const STORAGE_KEY = 'privacy-stock-v2-deployment';
+// Change this key whenever deployment bytecode changes so a partial older deployment cannot be resumed by mistake.
+const STORAGE_KEY = 'privacy-stock-v2-batch100-deployment';
 
 export function DeployV2() {
   const { address, chainId, isConnected } = useConnection();
@@ -116,7 +117,7 @@ export function DeployV2() {
       </header>
 
       <section className="mt-8 rounded-xl border border-warn/40 bg-warn-bg p-4 text-sm">
-        <strong>Base mainnet · real gas · unaudited contracts.</strong> V2 lets one pool balance create many independent notes. A 0.5 AAPLc note deducts its fee from that 0.5 amount. Transactions never pause while Earn is empty; fees wait in the pool until an Earn position exists.
+        <strong>Base mainnet · real gas · unaudited contracts.</strong> V2 starts immediately with no 24-hour wait. One pool balance can create batches of up to 100 independent notes—for example, 1 AAPLc as 100 gross 0.01 AAPLc notes. Each note deducts its own fee. Transfers never pause while Earn is empty; fees wait in the pool until an Earn position exists.
       </section>
 
       <ol className="mt-8 grid gap-4">
@@ -125,7 +126,7 @@ export function DeployV2() {
             {busy === 'rewards' ? 'Deploying…' : deployment.rewardsAddress ? 'Confirmed' : 'Deploy RewardsVaultV2'}
           </button>
         </DeployStep>
-        <DeployStep n="2" title="SplitPoolVault" description="Deposit once, then create multiple recipient/code notes." address={deployment.poolAddress} hash={deployment.poolTx}>
+        <DeployStep n="2" title="SplitPoolVault" description="Deposit once, then create up to 100 recipient/code notes per batch." address={deployment.poolAddress} hash={deployment.poolTx}>
           <button className="btn btn-primary" type="button" disabled={!deployment.rewardsAddress || !!busy || !!deployment.poolAddress} onClick={deployPool}>
             {busy === 'pool' ? 'Deploying…' : deployment.poolAddress ? 'Confirmed' : 'Deploy SplitPoolVault'}
           </button>

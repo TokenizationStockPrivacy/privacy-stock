@@ -14,6 +14,7 @@ contract SplitPoolVault is ReentrancyGuard {
 
     address public constant BASE_AAPLC = 0xb200000000000000000000C2e324d24d7eEcd1fb;
     uint256 public constant RECLAIM_DELAY = 90 days;
+    uint256 public constant MAX_BATCH_SIZE = 100;
     IERC20 public immutable asset;
     FeeManager public immutable feeManager;
     RewardsVaultV2 public immutable rewardsVault;
@@ -35,6 +36,7 @@ contract SplitPoolVault is ReentrancyGuard {
     error InvalidConfig();
     error InvalidAmount();
     error InvalidNote();
+    error InvalidBatch();
     error InsufficientPoolBalance();
     error FeeExceeded();
     error UnsupportedTokenBehavior();
@@ -83,24 +85,50 @@ contract SplitPoolVault is ReentrancyGuard {
     /// @param commitment keccak256(abi.encode(secret, recipient, address(this), block.chainid)).
     /// @param maxFee Maximum token units authorized as the fee.
     function createNote(uint256 grossAmount, address recipient, bytes32 commitment, uint256 maxFee) external nonReentrant {
+        _createNote(msg.sender, grossAmount, recipient, commitment, maxFee);
+        _flushIfPossible();
+    }
+
+    /// @notice Atomically creates as many as 100 independent notes from one pool balance.
+    /// @dev Every array index describes one note. Each note has its own amount, recipient, commitment, and fee limit.
+    function createNotes(
+        uint256[] calldata grossAmounts,
+        address[] calldata recipients,
+        bytes32[] calldata commitments,
+        uint256[] calldata maxFees
+    ) external nonReentrant {
+        uint256 length = grossAmounts.length;
+        if (
+            length == 0 || length > MAX_BATCH_SIZE || recipients.length != length
+                || commitments.length != length || maxFees.length != length
+        ) revert InvalidBatch();
+        for (uint256 i; i < length; ++i) {
+            _createNote(msg.sender, grossAmounts[i], recipients[i], commitments[i], maxFees[i]);
+        }
+        _flushIfPossible();
+    }
+
+    function _createNote(address depositor, uint256 grossAmount, address recipient, bytes32 commitment, uint256 maxFee) internal {
         if (grossAmount == 0 || recipient == address(0) || commitment == bytes32(0) || usedCommitments[commitment]) revert InvalidNote();
-        uint256 balance = poolBalance[msg.sender];
+        uint256 balance = poolBalance[depositor];
         if (grossAmount > balance) revert InsufficientPoolBalance();
         (uint256 fee,,,,,) = feeManager.quote(grossAmount);
         if (fee > maxFee || fee >= grossAmount) revert FeeExceeded();
 
         uint256 net = grossAmount - fee;
         uint256 reclaimAfter = block.timestamp + RECLAIM_DELAY;
-        poolBalance[msg.sender] = balance - grossAmount;
+        poolBalance[depositor] = balance - grossAmount;
         totalPoolBalance -= grossAmount;
         pendingFees += fee;
         totalLocked += net;
         usedCommitments[commitment] = true;
-        notes[commitment] = Note(msg.sender, recipient, net, reclaimAfter);
-        emit NoteCreated(commitment, msg.sender, recipient, grossAmount, fee, net, reclaimAfter);
+        notes[commitment] = Note(depositor, recipient, net, reclaimAfter);
+        emit NoteCreated(commitment, depositor, recipient, grossAmount, fee, net, reclaimAfter);
+    }
 
+    function _flushIfPossible() internal {
         // Transfers never pause. Fees wait safely in this contract until an Earn position exists.
-        if (fee != 0 && rewardsVault.totalPrincipal() != 0) _flushFees();
+        if (pendingFees != 0 && rewardsVault.totalPrincipal() != 0) _flushFees();
     }
 
     function flushFees() external nonReentrant {

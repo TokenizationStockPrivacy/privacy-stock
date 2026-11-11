@@ -9,7 +9,7 @@ Open-source AAPLc code escrow and fee-sharing application on Base mainnet.
 V2 adds `SplitPoolVault` and `RewardsVaultV2`:
 
 - Deposit AAPLc into one reusable pool balance.
-- Split that balance into any number of independent fixed-recipient notes. For example, a 1 AAPLc balance can create two gross 0.5 AAPLc notes with different recipients and different codes.
+- Split that balance into any number of independent fixed-recipient notes. One transaction can create up to 100 notes—for example, 1 AAPLc as 100 gross 0.01 AAPLc notes with separate recipients and codes. Additional batches can create more.
 - Each note deducts the quoted protocol fee from its gross amount.
 - Note creation does not pause when Earn is empty. Fees remain backed in `SplitPoolVault` and are flushed when an Earn position exists.
 - Earn principal is eligible immediately. This removes the V1 delay but introduces fee-sniping risk.

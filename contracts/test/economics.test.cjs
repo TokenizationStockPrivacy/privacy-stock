@@ -193,4 +193,27 @@ test('V2 pool splits one deposit across independent recipients and never pauses 
   assert.equal(await token.balanceOf(destinationB), net);
   assert.equal(await pool.totalLocked(), 0n);
   await assert.rejects(pool.redeem(secretA, destinationA));
+
+  // One additional 1 AAPLc pool balance can be split into 100 independent 0.01 notes atomically.
+  await (await token.mint(await sender.getAddress(), one)).wait();
+  await (await token.approve(await pool.getAddress(), one)).wait();
+  await (await pool.depositToPool(one)).wait();
+  const hundredth = one / 100n;
+  const batchFee = (await feeManager.quote(hundredth)).feeTokens;
+  const batchSecrets = Array.from({length:100}, () => newSecret());
+  const batchRecipients = Array.from({length:100}, (_, i) => i % 2 === 0 ? destinationA : destinationB);
+  const poolChainId = (await provider.getNetwork()).chainId;
+  const batchCommitments = batchSecrets.map((secret, i) => noteCommitment(secret, batchRecipients[i], pool.target, poolChainId));
+  await (await pool.createNotes(
+    Array(100).fill(hundredth),
+    batchRecipients,
+    batchCommitments,
+    Array(100).fill(batchFee),
+    {gasLimit: 25_000_000n}
+  )).wait();
+  assert.equal(await pool.poolBalance(await sender.getAddress()), 0n);
+  assert.equal(await pool.totalLocked(), (hundredth - batchFee) * 100n);
+  assert.equal(await rewards.pendingReward(await lp.getAddress()), fee * 2n + batchFee * 100n);
+  await (await pool.connect(relayer).redeem(batchSecrets[0], batchRecipients[0])).wait();
+  assert.equal(await token.balanceOf(destinationA), net + hundredth - batchFee);
 });

@@ -1,6 +1,6 @@
 # Split pool V2
 
-V2 separates funding from note creation. `depositToPool` credits a reusable on-chain balance. `createNote` removes a caller-selected gross amount from that balance and creates a fixed-recipient note. A single 1 AAPLc balance can therefore create two gross 0.5 AAPLc notes with different commitments, recipients, and codes.
+V2 separates funding from note creation. `depositToPool` credits a reusable on-chain balance. `createNote` removes a caller-selected gross amount from that balance and creates a fixed-recipient note. `createNotes` creates up to 100 independent notes atomically. A single 1 AAPLc balance can therefore create 100 gross 0.01 AAPLc notes with different commitments, recipients, and codes; additional transactions can create further batches.
 
 The progressive fee is quoted for each note and deducted from that note's gross amount. Two gross 0.5 notes consume exactly 1 AAPLc of pool balance, while each recipient receives 0.5 minus that note's fee.
 
