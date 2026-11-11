@@ -1,51 +1,186 @@
 # Privacy Stock
 
-Public, unaudited AAPLc code escrow and fee-funded Earn vault on Base mainnet. The live website is [privacy-stock-aaplc.rijan-b-hattarai9988.chatgpt.site](https://privacy-stock-aaplc.rijan-b-hattarai9988.chatgpt.site). **This is not a ZK privacy pool.** Depositor, recipient, amount, and fee are public; the code is public when used for withdrawal.
+Open-source AAPLc code escrow and fee-sharing application on Base mainnet.
 
-The complete MIT-licensed source is [publicly downloadable from the website](https://privacy-stock-aaplc.rijan-b-hattarai9988.chatgpt.site/privacy-stock-source.zip). All three contracts have an [exact Sourcify match](https://docs.sourcify.dev/docs/api/) for both creation and runtime bytecode: [FeeManager](https://repo.sourcify.dev/8453/0xb35Fd984913E99F82c53e47e1013075a187B6d28), [RewardsVault](https://repo.sourcify.dev/8453/0x7D317B61055D344c334901976ebAc10450566E6e), and [AppleFeeVault](https://repo.sourcify.dev/8453/0x8178B76de28E880bb1435346A4c227c0B92Bbecc). Source verification is not a security audit.
+> **Unaudited. Not private.** Depositors, recipients, amounts, and fees are public on-chain. A one-time code becomes public when it is used. This is not a zero-knowledge privacy pool and not an investment product. No independent security audit has been completed.
 
-## Mainnet contracts
+## What it does
 
-| Contract | Address | Deployment transaction |
+1. **Transfer.** You deposit AAPLc for one fixed recipient. Your browser generates a one-time code. Anyone holding the code can submit the redemption, but the AAPLc only goes to the recipient fixed at deposit. Each deposit redeems once.
+2. **Redeem.** The recipient (or anyone with the code) enters the code and the original recipient address. The site reads the note first, so you see the amount and recipient before you pay gas.
+3. **Earn.** You deposit AAPLc into the Earn vault. After a 24-hour activation period, your eligible principal shares future deposit fees, in proportion to eligible principal. Rewards depend on real fee activity and other eligible positions. No yield is promised.
+
+## Live deployment (Base mainnet, chain 8453)
+
+| Contract | Address | Sourcify status (checked 2026-11-10) |
 | --- | --- | --- |
-| FeeManager | [0xb35Fd984913E99F82c53e47e1013075a187B6d28](https://basescan.org/address/0xb35fd984913e99f82c53e47e1013075a187b6d28) | [0x766a…07b5](https://basescan.org/tx/0x766a8de621fad6171474fc0dd26d20d382dc892bab86f17d925cf26702ff07b5) |
-| RewardsVault | [0x7D317B61055D344c334901976ebAc10450566E6e](https://basescan.org/address/0x7d317b61055d344c334901976ebac10450566e6e) | [0x0352…a153](https://basescan.org/tx/0x0352c11be07e05168518e6eec9ac5aacd6603a8f6adbfbc1f628a8c84632a153) |
-| AppleFeeVault | [0x8178B76de28E880bb1435346A4c227c0B92Bbecc](https://basescan.org/address/0x8178b76de28e880bb1435346a4c227c0b92bbecc) | [0x166d…504c](https://basescan.org/tx/0x166dc59413c8f6b1a572607ac72cf8c88852d0d504957b68e9c76b290f52504c) |
+| AppleFeeVault (escrow) | [0x8178B76de28E880bb1435346A4c227c0B92Bbecc](https://basescan.org/address/0x8178B76de28E880bb1435346A4c227c0B92Bbecc) | Exact match (creation and runtime) |
+| RewardsVault (Earn) | [0x7D317B61055D344c334901976ebAc10450566E6e](https://basescan.org/address/0x7D317B61055D344c334901976ebAc10450566E6e) | Exact match (creation and runtime) |
+| FeeManager (fee quotes) | [0xb35Fd984913E99F82c53e47e1013075a187B6d28](https://basescan.org/address/0xb35Fd984913E99F82c53e47e1013075a187B6d28) | Exact match (creation and runtime) |
+| AAPLc token | [0xb200000000000000000000C2e324d24d7eEcd1fb](https://basescan.org/address/0xb200000000000000000000C2e324d24d7eEcd1fb) | Issuer token, not part of this repository |
 
-[Collector assignment](https://basescan.org/tx/0x110f650f84e3c611e4b60c05443c4a78a49944c89ea698a9c15c96198ad75ebc) restricts fee funding to AppleFeeVault. The deployment transaction input and contract configuration were verified against this repository with `node scripts/verify-system.mjs`; the result is in `deployments/base-mainnet-system.json`. The earlier standalone fee-free AppleVault remains at [0xEB8E2ef433aa8dff78940E28049AFf8204866C6C](https://basescan.org/address/0xeb8e2ef433aa8dff78940e28049aff8204866c6c).
+Deployment transactions and block numbers are in [`deployments/base-mainnet-system.json`](deployments/base-mainnet-system.json). The collector that may fund fees is set to AppleFeeVault ([setCollector transaction](https://basescan.org/tx/0x110f650f84e3c611e4b60c05443c4a78a49944c89ea698a9c15c96198ad75ebc)).
 
-## Use
+Verification records are in [`verification/sourcify-results.json`](verification/sourcify-results.json). Sourcify verification means the published source matches the deployed bytecode. **It is not a security audit.**
 
-1. Connect an EVM wallet on Base mainnet at the live site. You need eligible [Coinbase AAPLc](https://www.base.org/stocks) and ETH for gas.
-2. To earn fees, deposit AAPLc into Earn, wait 24 hours, then activate. At least one eligible position must exist before fee-charged transfer deposits can succeed.
-3. To send AAPLc, enter the amount and fixed recipient. The website generates a random 32-byte code locally and quotes the current Chainlink feed. Save the code and recipient address, approve AAPLc, and submit the deposit.
-4. A wallet holding the code can submit withdrawal, but the AAPLc goes to the fixed recipient. The code is revealed in transaction calldata. A depositor can reclaim an unredeemed note after 90 days; the fee is not refunded.
-5. Earn participants can claim accrued AAPLc fees and withdraw principal. Rewards depend on actual transfer volume and eligible principal; no return is promised.
+The earlier fee-free AppleVault remains at [0xEB8E2ef433aa8dff78940E28049AFf8204866C6C](https://basescan.org/address/0xeb8e2ef433aa8dff78940e28049aff8204866c6c). The website does not use it.
 
-Fees are progressive on USD value: 0.5% up to $1,000, 1% from $1,000 to $10,000, 1.5% from $10,000 to $100,000, and 2.5% above $100,000, capped at $15,000. AAPLc token fees round up to the smallest token unit. Quotes require the configured [AAPLc total-return feed](https://docs.base.org/build-on-base/integrate-defi/list-tokenized-stocks) to be no older than 36 hours. The website caps the submitted fee at the quote the user reviewed. 100% of the actual token fee is transferred to RewardsVault and allocated to currently eligible positions, subject to integer dust.
+## Repository layout
 
-## Build and verify
+```
+contracts/            Solidity sources (AppleFeeVault, RewardsVault, FeeManager, AppleVault)
+deployments/          Deployment records for Base mainnet
+verification/         Sourcify results, compiler version, standard JSON input
+docs/                 architecture.md, security.md, threat-model.md
+scripts/              compile, verification, and mainnet check scripts
+packages/sdk/         Note helper for the commitment format
+apps/web/             Next.js static site (wagmi + viem), exported to apps/web/out
+LICENSE               MIT
+```
 
-```sh
+## Prerequisites
+
+- Node.js 20 or newer (tested with Node 26).
+- npm (the repo is an npm workspace).
+- A browser wallet that supports Base mainnet, for using the site. Reading the site needs no wallet.
+
+No private keys, seed phrases, or API keys are needed to build, test, or read the site.
+
+## Setup
+
+```bash
 npm install
+```
+
+### Compile and test the contracts
+
+```bash
+npm run compile
+npm run test:contracts
+```
+
+### Run the website locally
+
+```bash
+npm run dev -w apps/web
+```
+
+Then open the URL that Next.js prints (usually http://localhost:3000).
+
+### Build the static site
+
+```bash
+npm run build:web
+```
+
+The output is `apps/web/out/`. It is a static export, so it can be served by any static host. The host must serve `/privacy-stock-source.zip` and `/LICENSE.txt` from the same origin.
+
+## Configuration
+
+Copy `.env.example` to `apps/web/.env.local` only if you need to override a default. Every value is public. Never put a private key or seed phrase in any `NEXT_PUBLIC_` variable, because Next.js inlines these values into the browser bundle.
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `NEXT_PUBLIC_BASE_RPC_URL` | `https://mainnet.base.org` | Base RPC used for all reads and for transaction receipts. |
+| `NEXT_PUBLIC_REPO_URL` | unset | When set, shows a "GitHub repository" button in the Open source section. Unset means the button is hidden. |
+
+Contract addresses are constants in [`apps/web/lib/contracts.ts`](apps/web/lib/contracts.ts). They match the deployment record. Changing them does not change the deployed contracts.
+
+## Website architecture
+
+| Area | Files | Notes |
+| --- | --- | --- |
+| Wallet and chain | `apps/web/lib/wagmi.ts`, `components/Providers.tsx`, `components/WalletButton.tsx` | wagmi v3 with EIP-6963 injected wallet discovery. The wallet dialog shows detected wallets. The header shows a "Switch to Base" state when the wallet is on another chain. |
+| Live data | `apps/web/lib/useProtocolData.ts` | Reads AAPLc decimals, symbol, and total supply, plus fees collected, eligible principal, escrow total, and the connected account's balance, position, and claimable reward. Refreshes every 15 seconds. Nothing is hardcoded. |
+| Commitments | `apps/web/lib/note.ts` | Generates the 32-byte code with `crypto.getRandomValues` and computes `keccak256(code, recipient, vault, chainId)`, the same value `AppleFeeVault.withdraw` checks. |
+| Transfer | `components/TransferPanel.tsx` | Validates the amount (8 decimals) and recipient, reads the live fee from FeeManager, shows the review, approves only if the allowance is short, then deposits with the reviewed fee as `maxFee`. |
+| Redeem | `components/RedeemPanel.tsx` | Validates the code format, reads `notes(commitment)` to confirm the note exists, then calls `withdraw`. |
+| Earn | `components/EarnPanel.tsx` | Deposit, activate, claim, and withdraw principal. Shows the activation countdown. |
+| Errors | `lib/errors.ts` | Maps wallet rejections, wrong network, insufficient balance and allowance, and contract custom errors (`NotEligible`, `FeeExceeded`, `NoteMissing`, and others) to plain messages. |
+| Theme | `components/ThemeToggle.tsx`, `app/layout.tsx`, `app/globals.css` | Light and dark modes. The saved choice applies before first paint. Storage failures are caught. |
+| Photos | `apps/web/public/photos/`, `lib/photos.ts` | Five CC0 or public-domain photos from Wikimedia Commons. Credits are listed in `lib/photos.ts`, not on the page. |
+| Motion | `components/CountUp.tsx`, `app/globals.css` | Hero code-to-recipient flow, count-up stats, fee coins flowing into the Earn pool, and scroll reveals. All motion stops under `prefers-reduced-motion`. |
+
+## How each feature works
+
+### Transfer, step by step
+
+1. Enter an amount and a recipient address. The amount is limited to 8 decimals and to your balance.
+2. Select **Generate code and quote**. The site reads FeeManager's `quote(amount)` and creates a code locally. Nothing is sent to a server, and nothing is signed yet.
+3. Review the fee, the net amount the recipient receives, and the code. Save the code and the recipient address. The site cannot recover the code. **Download note** saves them to a text file.
+4. Tick the saved checkbox, then select **Approve AAPLc and deposit**. The site re-reads the fee first. If it rose above your reviewed quote, the site asks you to generate a new quote.
+5. If the allowance is below the amount, you approve exactly that amount. Then you sign `deposit(amount, recipient, commitment, fee)`.
+6. The transaction is confirmed after two blocks. A reverted transaction is reported as an error, never as a success.
+
+### Redeem, step by step
+
+1. Enter the code and the original recipient address.
+2. Select **Check note**. This is a read-only call. It shows the amount and recipient the note holds, or that no active note matches.
+3. Select **Withdraw to recipient**. The contract recomputes the commitment from the code and the recipient. Funds go only to that recipient, even if someone else submits the transaction.
+
+### Earn, step by step
+
+1. **Deposit into Earn** approves the amount (if needed) and deposits it as pending principal. Each new deposit restarts the 24-hour activation timer for the pending principal.
+2. After the timer ends, **Activate eligible deposit** moves pending principal into eligible principal. Only eligible principal shares fees.
+3. Fees arrive in the RewardsVault when fee-charged deposits happen. **Claim rewards** pays out your accrued share.
+4. **Withdraw principal** takes pending principal first, then eligible principal. Accrued rewards stay claimable.
+
+## Fees
+
+Fees are progressive on the USD value of each deposit, as implemented in `FeeManager.feeUsdForValue`:
+
+| Deposit value (USD) | Fee rate (marginal) |
+| --- | --- |
+| Up to $1,000 | 0.50% |
+| $1,000 to $10,000 | 1.00% |
+| $10,000 to $100,000 | 1.50% |
+| Above $100,000 | 2.50% |
+
+The fee is capped at $15,000 per deposit. The AAPLc fee rounds up to the smallest token unit. The price comes from the configured feed. The contract rejects stale or non-positive prices.
+
+On each deposit, 100% of the actual fee moves to the RewardsVault and is allocated to eligible principal. Integer rounding dust stays in the vault.
+
+**Currently, no Earn position is eligible** (the on-chain `eligiblePrincipal` reads 0 at the time of writing). Fee-charged deposits revert until at least one position is active. The site shows this warning in the Transfer panel.
+
+## Security model
+
+- **Public data:** depositor, recipient, amount, fee, and timestamps. Codes are visible in calldata after redemption.
+- **Single use:** a redeemed or reclaimed note cannot be withdrawn again.
+- **Fixed destination:** the recipient is part of the commitment, so copying a withdrawal transaction cannot redirect funds.
+- **Reclaim:** the depositor can reclaim an unredeemed deposit after 90 days. The fee is not refunded.
+- **No pause, no upgrades:** the contracts have no pause function and are not proxies.
+- **Owner powers:** the RewardsVault owner can change the fee collector. The owner cannot withdraw depositor principal. The owner is `0x7e8ba8a0ed567e1e048d590c27f6e0ce8e90308f`.
+- **Issuer risk:** AAPLc issuer eligibility and transfer restrictions apply. A restricted address may be unable to deposit, redeem, or withdraw.
+- **Oracle risk:** fee amounts depend on a price feed.
+
+See [`docs/security.md`](docs/security.md) and [`docs/threat-model.md`](docs/threat-model.md) for the full analysis.
+
+## Verification and reproducibility
+
+```bash
 npm run compile
 npm run test:contracts
 node scripts/verify-system.mjs
 node scripts/prepare-verification.cjs
 npm run build:web
-npm run dev -w apps/web
 ```
 
-The website is a static Next.js export in `apps/web/out` and uses an injected EVM wallet plus Base RPC. The contracts use OpenZeppelin and Solidity 0.8.38. Local Ganache tests cover progressive fees, escrow replay/recipient binding, and full actual fee allocation.
+- `verify-system.mjs` checks the deployed configuration against this repository and writes `deployments/base-mainnet-system.json`.
+- `prepare-verification.cjs` regenerates the standard JSON input and compiler version.
+- Local Ganache tests cover progressive fees, escrow replay and recipient binding, and full fee allocation.
 
-`verification/standard-input.json` contains every Solidity source and the exact compiler settings used for deployment. `scripts/prepare-verification.cjs` rebuilds that input and checks that the resulting creation bytecode matches the original compilation. `scripts/verify-system.mjs` compares each deployment transaction with the compiled creation data and reads the live configuration. `verification/sourcify-results.json` records independent exact-match results from Sourcify. `scripts/verify-sourcify.mjs` can resubmit source verification if needed. BaseScan's automated submission reached its daily limit during verification; Sourcify verification succeeded.
+Re-check live verification at [Sourcify](https://repo.sourcify.dev/8453/0xb35Fd984913E99F82c53e47e1013075a187B6d28) and [BaseScan](https://basescan.org/). The website shows the verification record from the build date. It does not query Sourcify live.
 
-## Limits
+## Known limits
 
-- There is no zero-knowledge circuit, verifier, shielded transfer, encrypted note discovery, or transaction privacy.
-- The contracts and website have not been audited or formally verified. Do not rely on them for valuable assets.
-- AAPLc issuer eligibility, transfer controls, freezes, and corporate-action behavior can affect transfers. Review issuer terms. The [AAPLc prospectus](https://api.coinbase.com/v1/tokenized-stocks/prospectus/AAPLc.pdf) was not retrievable during development.
-- The code is generated in the browser and is not backed up. A lost code can prevent recipient withdrawal until the depositor's 90-day reclaim window.
-- Fees may be split across transfers to reduce the effective rate. The rewards vault cannot guarantee an APY.
+- The contracts are **unaudited**. Do not describe this project as audited unless an independent audit has been completed and published.
+- Earn rewards are variable. They can be zero for long periods.
+- The site reads through a public RPC. Use your own RPC with `NEXT_PUBLIC_BASE_RPC_URL` for reliability.
+- The one-time code is kept only in browser memory until you reload. Save it before you leave the page.
+- The design does not provide ZK privacy. The architecture document explains what a private design would need.
 
-MIT licensed.
+## Contributing and license
+
+Issues and pull requests are welcome. Keep changes to deployed-contract behavior out of frontend pull requests. A contract change needs a new deployment and a new verification record.
+
+Released under the [MIT License](LICENSE).
