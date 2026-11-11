@@ -4,6 +4,18 @@ Open-source AAPLc code escrow and fee-sharing application on Base mainnet.
 
 > **Unaudited. Not private.** Depositors, recipients, amounts, and fees are public on-chain. A one-time code becomes public when it is used. This is not a zero-knowledge privacy pool and not an investment product. No independent security audit has been completed.
 
+## Split pool V2 (deployment prepared, not yet live)
+
+V2 adds `SplitPoolVault` and `RewardsVaultV2`:
+
+- Deposit AAPLc into one reusable pool balance.
+- Split that balance into any number of independent fixed-recipient notes. For example, a 1 AAPLc balance can create two gross 0.5 AAPLc notes with different recipients and different codes.
+- Each note deducts the quoted protocol fee from its gross amount.
+- Note creation does not pause when Earn is empty. Fees remain backed in `SplitPoolVault` and are flushed when an Earn position exists.
+- Earn principal is eligible immediately. This removes the V1 delay but introduces fee-sniping risk.
+
+The local `/deploy-v2` page deploys both V2 contracts and assigns the split pool as fee collector. Do not treat V2 as live until its Base mainnet addresses are added to the deployment record and public website.
+
 ## What it does
 
 1. **Transfer.** You deposit AAPLc for one fixed recipient. Your browser generates a one-time code. Anyone holding the code can submit the redemption, but the AAPLc only goes to the recipient fixed at deposit. Each deposit redeems once.
@@ -28,7 +40,7 @@ The earlier fee-free AppleVault remains at [0xEB8E2ef433aa8dff78940E28049AFf8204
 ## Repository layout
 
 ```
-contracts/            Solidity sources (AppleFeeVault, RewardsVault, FeeManager, AppleVault)
+contracts/            Solidity sources, including SplitPoolVault and RewardsVaultV2
 deployments/          Deployment records for Base mainnet
 verification/         Sourcify results, compiler version, standard JSON input
 docs/                 architecture.md, security.md, threat-model.md

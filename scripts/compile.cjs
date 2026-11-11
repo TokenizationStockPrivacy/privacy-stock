@@ -15,7 +15,7 @@ const vault = output.contracts['src/AppleVault.sol'].AppleVault;
 const artifactPath = path.join(process.cwd(), 'apps/web/lib/artifacts/AppleVault.json');
 fs.mkdirSync(path.dirname(artifactPath), {recursive: true});
 fs.writeFileSync(artifactPath, JSON.stringify({abi: vault.abi, bytecode: '0x' + vault.evm.bytecode.object}, null, 2) + '\n');
-for (const name of ['FeeManager', 'RewardsVault', 'AppleFeeVault']) {
+for (const name of ['FeeManager', 'RewardsVault', 'AppleFeeVault', 'RewardsVaultV2', 'SplitPoolVault']) {
   const contract = output.contracts[`src/${name}.sol`][name];
   const target = path.join(process.cwd(), `apps/web/lib/artifacts/${name}.json`);
   fs.mkdirSync(path.dirname(target), {recursive:true});

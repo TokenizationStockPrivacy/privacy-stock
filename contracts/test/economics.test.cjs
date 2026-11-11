@@ -139,3 +139,58 @@ test('fee escrow sends the full actual progressive fee to eligible depositors', 
   assert.equal(await rewards.totalRewardsPaid(), expectedFee);
   assert.equal(await token.balanceOf(await rewards.getAddress()), 100n*share);
 });
+
+test('V2 pool splits one deposit across independent recipients and never pauses for Earn', async () => {
+  const {newSecret, noteCommitment} = await import('../../packages/sdk/note.mjs');
+  const provider = new ethers.BrowserProvider(ganache.provider({logging:{quiet:true}}));
+  const [sender, lp, recipientA, recipientB, relayer] = await Promise.all([0,1,2,3,4].map(i=>provider.getSigner(i)));
+  const token = await deploy('MockAAPL', sender);
+  const feed = await deploy('MockUsdFeed', sender);
+  const current = await provider.getBlock('latest');
+  await (await feed.set(100n*10n**8n, BigInt(current.timestamp))).wait();
+  const feeManager = await deploy('FeeManager', sender, await token.getAddress(), await feed.getAddress(), 3600n);
+  const rewards = await deploy('RewardsVaultV2', sender, await token.getAddress(), await sender.getAddress(), await sender.getAddress());
+  const pool = await deploy('SplitPoolVault', sender, await token.getAddress(), await feeManager.getAddress(), await rewards.getAddress());
+  await (await rewards.setCollector(await pool.getAddress())).wait();
+
+  const share = 10n**18n;
+  const one = share;
+  const half = share / 2n;
+  await (await token.mint(await sender.getAddress(), one)).wait();
+  await (await token.approve(await pool.getAddress(), one)).wait();
+  await (await pool.depositToPool(one)).wait();
+  assert.equal(await pool.poolBalance(await sender.getAddress()), one);
+
+  const secretA = newSecret();
+  const secretB = newSecret();
+  const destinationA = await recipientA.getAddress();
+  const destinationB = await recipientB.getAddress();
+  const commitmentA = noteCommitment(secretA, destinationA, await pool.getAddress(), (await provider.getNetwork()).chainId);
+  const commitmentB = noteCommitment(secretB, destinationB, await pool.getAddress(), (await provider.getNetwork()).chainId);
+  const quote = await feeManager.quote(half);
+  const fee = quote.feeTokens;
+  const net = half - fee;
+
+  // The first note succeeds even though nobody has deposited into Earn yet.
+  await (await pool.createNote(half, destinationA, commitmentA, fee)).wait();
+  assert.equal(await pool.pendingFees(), fee);
+  assert.equal(await pool.poolBalance(await sender.getAddress()), half);
+
+  // Earn V2 is immediately eligible; the next note flushes both fees.
+  await (await token.mint(await lp.getAddress(), 10n*share)).wait();
+  await (await token.connect(lp).approve(await rewards.getAddress(), 10n*share)).wait();
+  await (await rewards.connect(lp).deposit(10n*share)).wait();
+  assert.equal(await rewards.eligiblePrincipal(), 10n*share);
+  await (await pool.createNote(half, destinationB, commitmentB, fee)).wait();
+  assert.equal(await pool.poolBalance(await sender.getAddress()), 0n);
+  assert.equal(await pool.pendingFees(), 0n);
+  assert.equal(await rewards.pendingReward(await lp.getAddress()), fee * 2n);
+
+  // Either recipient or a relayer can submit a code, but each payout is fixed to its own recipient.
+  await (await pool.connect(relayer).redeem(secretA, destinationA)).wait();
+  await (await pool.connect(recipientB).redeem(secretB, destinationB)).wait();
+  assert.equal(await token.balanceOf(destinationA), net);
+  assert.equal(await token.balanceOf(destinationB), net);
+  assert.equal(await pool.totalLocked(), 0n);
+  await assert.rejects(pool.redeem(secretA, destinationA));
+});
