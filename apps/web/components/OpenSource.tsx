@@ -7,7 +7,7 @@ import { VERIFICATION_RECORD, type VerifiedName } from '../lib/verification';
  */
 const REPO_URL = process.env.NEXT_PUBLIC_REPO_URL;
 
-const NAMES: VerifiedName[] = ['AppleFeeVault', 'RewardsVault', 'FeeManager'];
+const NAMES: VerifiedName[] = ['SplitPoolVault', 'RewardsVaultV2', 'FeeManager'];
 
 export function OpenSource() {
   return (
@@ -47,18 +47,19 @@ export function OpenSource() {
                 const c = CONTRACTS[name];
                 const v = VERIFICATION_RECORD.contracts[name];
                 const exact = v.match === 'exact_match' && v.creationMatch === 'exact_match' && v.runtimeMatch === 'exact_match';
+                const localExact = v.creationMatch === 'local_exact' && v.runtimeMatch === 'local_exact';
                 return (
                   <li key={name} className="py-4">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <p className="font-medium">{name}</p>
-                      <span className={exact ? 'chip chip-ok' : 'chip chip-warn'}>
-                        {exact ? 'Sourcify exact match' : 'Verification pending'}
+                      <span className={exact || localExact ? 'chip chip-ok' : 'chip chip-warn'}>
+                        {exact ? 'Sourcify exact match' : localExact ? 'On-chain bytecode matches' : 'Verification pending'}
                       </span>
                     </div>
                     <p className="mt-1 break-all font-mono text-xs text-muted">{c.address}</p>
                     <div className="mt-2 flex flex-wrap gap-4 text-xs">
                       <a className="link" href={basescanAddress(c.address)} target="_blank" rel="noreferrer">BaseScan ↗</a>
-                      <a className="link" href={sourcifyRepo(c.address)} target="_blank" rel="noreferrer">Sourcify source ↗</a>
+                      {exact && <a className="link" href={sourcifyRepo(c.address)} target="_blank" rel="noreferrer">Sourcify source ↗</a>}
                       <a className="link" href={`https://basescan.org/tx/${c.deployTx}`} target="_blank" rel="noreferrer">Deployment tx ↗</a>
                     </div>
                   </li>
@@ -66,7 +67,7 @@ export function OpenSource() {
               })}
             </ul>
             <p className="mt-5 text-xs text-muted">
-              Verified source matches the deployed bytecode. It is <span className="font-medium text-ink">not a security audit</span>.
+              Local source was compiled and matched against deployed bytecode; Sourcify status is shown separately. This is <span className="font-medium text-ink">not a security audit</span>.
             </p>
           </div>
         </div>

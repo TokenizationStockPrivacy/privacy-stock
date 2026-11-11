@@ -1,5 +1,7 @@
 # Threat model
 
+> The 24-hour discussion below applies to legacy V1. Live V2 uses immediate eligibility and therefore explicitly accepts fee-sniping risk; see [`v2-split-pool.md`](v2-split-pool.md).
+
 - **Price validity:** The fee proof must bind the exact feed round, answer, and timestamp, and settlement must reject stale or superseded snapshots. Off-hours or corporate-action feed freezes halt transfers.
 - **Amount leakage:** A fee amount, token transfer, gas pattern, deposit, withdrawal, or batch timing can reveal a transfer size or link users. Fee funding needs batching with carefully analyzed anonymity sets.
 - **Split evasion:** Marginal rates encourage splitting. A $150,000 transfer costs $2,695; $100,000 + $50,000 costs $2,140. Linking transfers to stop this would weaken privacy, so economics and privacy need joint design.

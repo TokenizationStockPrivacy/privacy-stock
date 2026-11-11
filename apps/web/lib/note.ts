@@ -1,5 +1,5 @@
 import { encodeAbiParameters, keccak256, parseAbiParameters, type Address, type Hex } from 'viem';
-import { APPLE_FEE_VAULT, BASE_CHAIN_ID } from './contracts';
+import { BASE_CHAIN_ID, SPLIT_POOL_VAULT } from './contracts';
 
 /** A one-time code is 32 random bytes, encoded as 0x + 64 hex characters. */
 export const CODE_PATTERN = /^0x[0-9a-fA-F]{64}$/;
@@ -16,14 +16,14 @@ export function generateCode(): Hex {
 
 /**
  * Commitment stored on-chain: keccak256(code, recipient, vault, chainId).
- * Must match AppleFeeVault.withdraw, which recomputes the same value.
+ * Must match SplitPoolVault.redeem, which recomputes the same value.
  */
 export function commitmentFor(code: Hex, recipient: Address): Hex {
   return keccak256(
     encodeAbiParameters(parseAbiParameters('bytes32, address, address, uint256'), [
       code,
       recipient,
-      APPLE_FEE_VAULT,
+      SPLIT_POOL_VAULT,
       BigInt(BASE_CHAIN_ID),
     ]),
   );

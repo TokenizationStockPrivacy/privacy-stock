@@ -6,10 +6,10 @@ import { FEE_SCHEDULE } from './feeSchedule';
  */
 const STEPS = [
   { n: '01', title: 'Connect wallet', line: 'Use a Base wallet. Nothing is signed until you confirm.' },
-  { n: '02', title: 'Deposit AAPLc', line: 'Set the amount and a fixed recipient.' },
-  { n: '03', title: 'Share the code', line: 'Save it, then send it to the recipient.' },
-  { n: '04', title: 'Redeem', line: 'Funds go only to the recipient set at deposit.' },
-  { n: '05', title: 'Earn fees', line: 'Activate after 24 hours. Rewards vary.' },
+  { n: '02', title: 'Fund the pool', line: 'Deposit once, then split the balance immediately.' },
+  { n: '03', title: 'Create up to 100', line: 'Give every recipient a separate one-time code.' },
+  { n: '04', title: 'Redeem', line: 'Funds go only to the recipient fixed for that note.' },
+  { n: '05', title: 'Earn immediately', line: 'No activation delay. Rewards vary.' },
 ] as const;
 
 export function HowItWorks() {

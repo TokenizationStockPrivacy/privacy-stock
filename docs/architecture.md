@@ -1,5 +1,7 @@
 # Architecture status
 
+> This document primarily describes legacy V1 and the proposed ZK direction. The live split-pool implementation is documented in [`v2-split-pool.md`](v2-split-pool.md).
+
 The current implementation has **three independent contracts**, not an integrated private stock-transfer protocol.
 
 `AppleVault` is a public escrow. It accepts only the configured ERC-20, and on Base mainnet its constructor enforces the official AAPLc address. Each deposit stores the amount, depositor, fixed recipient, and 90-day recovery time under a one-time commitment. Withdrawal proves knowledge of a random secret in calldata. Since the recipient is part of the commitment, copying the withdrawal transaction cannot redirect assets. The depositor can reclaim after the deadline. This has no ZK privacy or fee integration.

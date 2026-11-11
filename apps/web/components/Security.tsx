@@ -3,10 +3,10 @@ const TILES = [
   { title: 'Public on-chain', line: 'Sender, recipient, amount, and fee are visible.', tone: 'ok', icon: 'eye' },
   { title: 'Code goes public', line: 'It appears in transaction data when used.', tone: 'warn', icon: 'unlock' },
   { title: 'Single use', line: 'A redeemed note cannot be used again.', tone: 'ok', icon: 'check' },
-  { title: 'Fixed recipient', line: 'Funds only reach the address set at deposit.', tone: 'ok', icon: 'lock' },
+  { title: 'Fixed recipient', line: 'Funds only reach the address set for that note.', tone: 'ok', icon: 'lock' },
   { title: '90-day reclaim', line: 'Depositors can reclaim unredeemed deposits.', tone: 'ok', icon: 'clock' },
   { title: 'No fee refund', line: 'Fees are kept if a deposit is reclaimed.', tone: 'warn', icon: 'coin' },
-  { title: 'Issuer rules', line: 'AAPLc eligibility and transfer limits may apply.', tone: 'warn', icon: 'shield' },
+  { title: 'Immediate Earn', line: 'No delay means fee sniping is possible.', tone: 'warn', icon: 'shield' },
   { title: 'Unaudited', line: 'Verified source is not a security audit.', tone: 'danger', icon: 'alert' },
 ] as const;
 

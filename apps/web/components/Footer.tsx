@@ -1,4 +1,4 @@
-import { APPLE_FEE_VAULT, AAPLC_TOKEN, CONTRACTS, BASE_CHAIN_ID, basescanAddress } from '../lib/contracts';
+import { AAPLC_TOKEN, CONTRACTS, BASE_CHAIN_ID, SPLIT_POOL_VAULT, basescanAddress } from '../lib/contracts';
 
 export function Footer() {
   return (
@@ -15,8 +15,8 @@ export function Footer() {
         <div>
           <p className="font-semibold">Contracts</p>
           <ul className="mt-3 space-y-2 text-muted">
-            <li><a className="link" href={basescanAddress(CONTRACTS.AppleFeeVault.address)} target="_blank" rel="noreferrer">AppleFeeVault</a></li>
-            <li><a className="link" href={basescanAddress(CONTRACTS.RewardsVault.address)} target="_blank" rel="noreferrer">RewardsVault</a></li>
+            <li><a className="link" href={basescanAddress(CONTRACTS.SplitPoolVault.address)} target="_blank" rel="noreferrer">SplitPoolVault V2</a></li>
+            <li><a className="link" href={basescanAddress(CONTRACTS.RewardsVaultV2.address)} target="_blank" rel="noreferrer">RewardsVault V2</a></li>
             <li><a className="link" href={basescanAddress(CONTRACTS.FeeManager.address)} target="_blank" rel="noreferrer">FeeManager</a></li>
             <li><a className="link" href={basescanAddress(AAPLC_TOKEN)} target="_blank" rel="noreferrer">AAPLc token</a></li>
           </ul>
@@ -30,7 +30,7 @@ export function Footer() {
             <li><a className="link" href="#open-source">Verification status</a></li>
             <li><a className="link" href="#security">Security and transparency</a></li>
           </ul>
-          <p className="mt-6 break-all font-mono text-xs text-muted">Escrow: {APPLE_FEE_VAULT}</p>
+          <p className="mt-6 break-all font-mono text-xs text-muted">Pool: {SPLIT_POOL_VAULT}</p>
         </div>
       </div>
       <div className="border-t border-line px-4 py-4 text-center text-xs text-muted sm:px-6">

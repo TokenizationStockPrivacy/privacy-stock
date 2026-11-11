@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { useConnection, usePublicClient, useWriteContract } from 'wagmi';
 import { base } from 'wagmi/chains';
 import { getAddress, isAddress, type Address, type Hex } from 'viem';
-import { APPLE_FEE_VAULT, CONTRACTS, basescanAddress } from '../lib/contracts';
+import { CONTRACTS, SPLIT_POOL_VAULT } from '../lib/contracts';
 import { friendlyError } from '../lib/errors';
 import { formatExact, shortAddress } from '../lib/format';
 import { CODE_PATTERN, commitmentFor } from '../lib/note';
@@ -48,7 +48,7 @@ export function RedeemPanel() {
       const commitment = commitmentFor(code as Hex, recipient);
       // notes(commitment) returns the Note struct in order: depositor, recipient, amount, reclaimAfter.
       const [, noteRecipient, amount] = (await publicClient.readContract({
-        address: APPLE_FEE_VAULT, abi: CONTRACTS.AppleFeeVault.abi, functionName: 'notes', args: [commitment],
+        address: SPLIT_POOL_VAULT, abi: CONTRACTS.SplitPoolVault.abi, functionName: 'notes', args: [commitment],
       })) as readonly [Address, Address, bigint, bigint];
       if (amount === BigInt(0)) {
         setTx({ phase: 'error', message: 'No active note matches this code and recipient. It may already be redeemed or reclaimed.' });
@@ -68,9 +68,9 @@ export function RedeemPanel() {
     setTx({ phase: 'signing', label: 'Redeem' });
     try {
       const hash = await writeAsync({
-        address: APPLE_FEE_VAULT,
-        abi: CONTRACTS.AppleFeeVault.abi,
-        functionName: 'withdraw',
+        address: SPLIT_POOL_VAULT,
+        abi: CONTRACTS.SplitPoolVault.abi,
+        functionName: 'redeem',
         args: [code as Hex, recipient],
         chainId: base.id,
       });

@@ -1,6 +1,6 @@
 # Privacy v2: scope and open decisions
 
-Status: **scoping only. Nothing here is implemented or deployed.** The live contracts (AppleFeeVault, RewardsVault, FeeManager) are immutable and do not hide sender, recipient, amount, or fee. The current website says so.
+Status: **ZK privacy scoping only. Nothing in this document is implemented or deployed.** The live split-pool contracts (`SplitPoolVault`, `RewardsVaultV2`, and `FeeManager`) are immutable and do not hide sender, recipient, amount, or fee. "V2" in the live product means the split-balance upgrade, not a ZK privacy release.
 
 ## 1. Goal
 

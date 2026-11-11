@@ -1,0 +1,24 @@
+{
+  "chainId": 8453,
+  "asset": "0xb200000000000000000000C2e324d24d7eEcd1fb",
+  "owner": "0x7e8ba8a0ed567e1e048d590c27f6e0ce8e90308f",
+  "feeManager": "0xb35Fd984913E99F82c53e47e1013075a187B6d28",
+  "contracts": {
+    "RewardsVaultV2": {
+      "address": "0x7EDe3DFe8347bfab5e89fa109F2C091fBFaB278a",
+      "transactionHash": "0xe8dd98e7eff893769ffd05dff5839dc6f860cbbb45e95956b1ee2d20637a4ebf",
+      "blockNumber": 56014329
+    },
+    "SplitPoolVault": {
+      "address": "0x3E2b92a2b515a4cF3aFbe82FA92BD0802303C89C",
+      "transactionHash": "0xc323d8b54c2b898bf0eee8a754c15440d144808aad8b50d36d6674b2433191fe",
+      "blockNumber": 56014363
+    }
+  },
+  "setCollector": {
+    "transactionHash": "0x8b142b150f6026f3358857489a0bc60118f4259a67f3d4bdc749a83cabcbb98c",
+    "blockNumber": 56014400
+  },
+  "maxBatchSize": 100,
+  "verifiedOnChainAt": "2026-11-11"
+}

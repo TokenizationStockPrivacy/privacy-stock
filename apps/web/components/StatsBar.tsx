@@ -1,6 +1,6 @@
 'use client';
 import { useConnection } from 'wagmi';
-import { AAPLC_TOKEN, APPLE_FEE_VAULT, basescanAddress } from '../lib/contracts';
+import { AAPLC_TOKEN, SPLIT_POOL_VAULT, basescanAddress } from '../lib/contracts';
 import { formatNumber, toNumber } from '../lib/format';
 import { useProtocolData } from '../lib/useProtocolData';
 import { CountUp } from './CountUp';
@@ -12,7 +12,7 @@ export function StatsBar() {
   const dec = data.decimals;
 
   const stats = [
-    { label: 'Your balance', value: address ? toNumber(data.balance, dec) : undefined, empty: address ? '–' : 'Connect', unit: address ? data.symbol : '' },
+    { label: 'Your pool balance', value: address ? toNumber(data.poolBalance, dec) : undefined, empty: address ? '–' : 'Connect', unit: address ? data.symbol : '' },
     { label: 'Fees collected', value: toNumber(data.feesCollected, dec), empty: '–', unit: data.symbol },
     { label: 'Eligible Earn', value: toNumber(data.eligiblePrincipal, dec), empty: '–', unit: data.symbol },
     { label: 'In escrow', value: toNumber(data.escrowLocked, dec), empty: '–', unit: data.symbol },
@@ -43,7 +43,7 @@ export function StatsBar() {
       </div>
 
       <p className="mt-4 text-xs text-muted">
-        Escrow: <a className="link font-mono" href={basescanAddress(APPLE_FEE_VAULT)} target="_blank" rel="noreferrer">{APPLE_FEE_VAULT.slice(0, 10)}…</a>
+        Split pool: <a className="link font-mono" href={basescanAddress(SPLIT_POOL_VAULT)} target="_blank" rel="noreferrer">{SPLIT_POOL_VAULT.slice(0, 10)}…</a>
       </p>
     </section>
   );

@@ -4,7 +4,7 @@ Open-source AAPLc code escrow and fee-sharing application on Base mainnet.
 
 > **Unaudited. Not private.** Depositors, recipients, amounts, and fees are public on-chain. A one-time code becomes public when it is used. This is not a zero-knowledge privacy pool and not an investment product. No independent security audit has been completed.
 
-## Split pool V2 (deployment prepared, not yet live)
+## Split pool V2 (live on Base mainnet)
 
 V2 adds `SplitPoolVault` and `RewardsVaultV2`:
 
@@ -14,24 +14,26 @@ V2 adds `SplitPoolVault` and `RewardsVaultV2`:
 - Note creation does not pause when Earn is empty. Fees remain backed in `SplitPoolVault` and are flushed when an Earn position exists.
 - Earn principal is eligible immediately. This removes the V1 delay but introduces fee-sniping risk.
 
-The local `/deploy-v2` page deploys both V2 contracts and assigns the split pool as fee collector. Do not treat V2 as live until its Base mainnet addresses are added to the deployment record and public website.
+The deployment and configuration are recorded in [`deployments/base-mainnet-v2.json`](deployments/base-mainnet-v2.json). The creation transactions exactly match the locally compiled bytecode and constructor arguments.
 
 ## What it does
 
-1. **Transfer.** You deposit AAPLc for one fixed recipient. Your browser generates a one-time code. Anyone holding the code can submit the redemption, but the AAPLc only goes to the recipient fixed at deposit. Each deposit redeems once.
+1. **Pool and split.** Deposit AAPLc once into a reusable balance, then create up to 100 independent fixed-recipient notes per transaction. Every note receives a separate browser-generated code and redeems once.
 2. **Redeem.** The recipient (or anyone with the code) enters the code and the original recipient address. The site reads the note first, so you see the amount and recipient before you pay gas.
-3. **Earn.** You deposit AAPLc into the Earn vault. After a 24-hour activation period, your eligible principal shares future deposit fees, in proportion to eligible principal. Rewards depend on real fee activity and other eligible positions. No yield is promised.
+3. **Earn.** Deposited principal becomes eligible immediately and shares future note fees in proportion to principal. Rewards depend on real fee activity and other positions. No yield is promised. Immediate eligibility permits fee sniping.
 
 ## Live deployment (Base mainnet, chain 8453)
 
 | Contract | Address | Sourcify status (checked 2026-11-10) |
 | --- | --- | --- |
+| SplitPoolVault V2 | [0x3E2b92a2b515a4cF3aFbe82FA92BD0802303C89C](https://basescan.org/address/0x3E2b92a2b515a4cF3aFbe82FA92BD0802303C89C) | Local creation bytecode exact match; Sourcify pending |
+| RewardsVaultV2 | [0x7EDe3DFe8347bfab5e89fa109F2C091fBFaB278a](https://basescan.org/address/0x7EDe3DFe8347bfab5e89fa109F2C091fBFaB278a) | Local creation bytecode exact match; Sourcify pending |
 | AppleFeeVault (escrow) | [0x8178B76de28E880bb1435346A4c227c0B92Bbecc](https://basescan.org/address/0x8178B76de28E880bb1435346A4c227c0B92Bbecc) | Exact match (creation and runtime) |
 | RewardsVault (Earn) | [0x7D317B61055D344c334901976ebAc10450566E6e](https://basescan.org/address/0x7D317B61055D344c334901976ebAc10450566E6e) | Exact match (creation and runtime) |
 | FeeManager (fee quotes) | [0xb35Fd984913E99F82c53e47e1013075a187B6d28](https://basescan.org/address/0xb35Fd984913E99F82c53e47e1013075a187B6d28) | Exact match (creation and runtime) |
 | AAPLc token | [0xb200000000000000000000C2e324d24d7eEcd1fb](https://basescan.org/address/0xb200000000000000000000C2e324d24d7eEcd1fb) | Issuer token, not part of this repository |
 
-Deployment transactions and block numbers are in [`deployments/base-mainnet-system.json`](deployments/base-mainnet-system.json). The collector that may fund fees is set to AppleFeeVault ([setCollector transaction](https://basescan.org/tx/0x110f650f84e3c611e4b60c05443c4a78a49944c89ea698a9c15c96198ad75ebc)).
+V2 deployment transactions and block numbers are in [`deployments/base-mainnet-v2.json`](deployments/base-mainnet-v2.json). V1 remains recorded in [`deployments/base-mainnet-system.json`](deployments/base-mainnet-system.json) as a legacy deployment and is no longer used by the website.
 
 Verification records are in [`verification/sourcify-results.json`](verification/sourcify-results.json). Sourcify verification means the published source matches the deployed bytecode. **It is not a security audit.**
 
@@ -104,10 +106,10 @@ Contract addresses are constants in [`apps/web/lib/contracts.ts`](apps/web/lib/c
 | --- | --- | --- |
 | Wallet and chain | `apps/web/lib/wagmi.ts`, `components/Providers.tsx`, `components/WalletButton.tsx` | wagmi v3 with EIP-6963 injected wallet discovery. The wallet dialog shows detected wallets. The header shows a "Switch to Base" state when the wallet is on another chain. |
 | Live data | `apps/web/lib/useProtocolData.ts` | Reads AAPLc decimals, symbol, and total supply, plus fees collected, eligible principal, escrow total, and the connected account's balance, position, and claimable reward. Refreshes every 15 seconds. Nothing is hardcoded. |
-| Commitments | `apps/web/lib/note.ts` | Generates the 32-byte code with `crypto.getRandomValues` and computes `keccak256(code, recipient, vault, chainId)`, the same value `AppleFeeVault.withdraw` checks. |
-| Transfer | `components/TransferPanel.tsx` | Validates the amount (8 decimals) and recipient, reads the live fee from FeeManager, shows the review, approves only if the allowance is short, then deposits with the reviewed fee as `maxFee`. |
-| Redeem | `components/RedeemPanel.tsx` | Validates the code format, reads `notes(commitment)` to confirm the note exists, then calls `withdraw`. |
-| Earn | `components/EarnPanel.tsx` | Deposit, activate, claim, and withdraw principal. Shows the activation countdown. |
+| Commitments | `apps/web/lib/note.ts` | Generates the 32-byte code with `crypto.getRandomValues` and computes `keccak256(code, recipient, vault, chainId)`, the same value `SplitPoolVault.redeem` checks. |
+| Pool and split | `components/TransferPanel.tsx` | Funds a reusable pool balance, parses 1–100 recipient/amount rows, quotes every fee, generates separate codes, and creates the batch atomically. |
+| Redeem | `components/RedeemPanel.tsx` | Validates the code format, reads `notes(commitment)` to confirm the note exists, then calls `redeem`. |
+| Earn | `components/EarnPanel.tsx` | Deposit, claim, and withdraw principal with immediate eligibility and no activation transaction. |
 | Errors | `lib/errors.ts` | Maps wallet rejections, wrong network, insufficient balance and allowance, and contract custom errors (`NotEligible`, `FeeExceeded`, `NoteMissing`, and others) to plain messages. |
 | Theme | `components/ThemeToggle.tsx`, `app/layout.tsx`, `app/globals.css` | Light and dark modes. The saved choice applies before first paint. Storage failures are caught. |
 | Photos | `apps/web/public/photos/`, `lib/photos.ts` | Five CC0 or public-domain photos from Wikimedia Commons. Credits are listed in `lib/photos.ts`, not on the page. |
@@ -115,14 +117,13 @@ Contract addresses are constants in [`apps/web/lib/contracts.ts`](apps/web/lib/c
 
 ## How each feature works
 
-### Transfer, step by step
+### Pool and split, step by step
 
-1. Enter an amount and a recipient address. The amount is limited to 8 decimals and to your balance.
-2. Select **Generate code and quote**. The site reads FeeManager's `quote(amount)` and creates a code locally. Nothing is sent to a server, and nothing is signed yet.
-3. Review the fee, the net amount the recipient receives, and the code. Save the code and the recipient address. The site cannot recover the code. **Download note** saves them to a text file.
-4. Tick the saved checkbox, then select **Approve AAPLc and deposit**. The site re-reads the fee first. If it rose above your reviewed quote, the site asks you to generate a new quote.
-5. If the allowance is below the amount, you approve exactly that amount. Then you sign `deposit(amount, recipient, commitment, fee)`.
-6. The transaction is confirmed after two blocks. A reverted transaction is reported as an error, never as a success.
+1. Approve and deposit AAPLc into your reusable `poolBalance`.
+2. Enter one line per withdrawal as `recipient, amount`, up to 100 lines per batch.
+3. The site quotes every fee and generates an independent code and commitment locally for every line.
+4. Save every code, then sign `createNotes`. The transaction atomically debits the gross amounts and creates all notes.
+5. Each recipient receives its note's gross amount minus that note's fee. Additional batches can create more than 100 notes.
 
 ### Redeem, step by step
 
@@ -132,10 +133,9 @@ Contract addresses are constants in [`apps/web/lib/contracts.ts`](apps/web/lib/c
 
 ### Earn, step by step
 
-1. **Deposit into Earn** approves the amount (if needed) and deposits it as pending principal. Each new deposit restarts the 24-hour activation timer for the pending principal.
-2. After the timer ends, **Activate eligible deposit** moves pending principal into eligible principal. Only eligible principal shares fees.
-3. Fees arrive in the RewardsVault when fee-charged deposits happen. **Claim rewards** pays out your accrued share.
-4. **Withdraw principal** takes pending principal first, then eligible principal. Accrued rewards stay claimable.
+1. **Deposit into Earn** approves the amount (if needed) and makes the principal eligible immediately.
+2. Fees reach `RewardsVaultV2` when notes are created while principal exists. Fees created while Earn is empty remain in `SplitPoolVault.pendingFees` until they can be flushed.
+3. **Claim rewards** pays the account's accrued share. **Withdraw principal** removes any selected amount immediately.
 
 ## Fees
 
@@ -150,9 +150,9 @@ Fees are progressive on the USD value of each deposit, as implemented in `FeeMan
 
 The fee is capped at $15,000 per deposit. The AAPLc fee rounds up to the smallest token unit. The price comes from the configured feed. The contract rejects stale or non-positive prices.
 
-On each deposit, 100% of the actual fee moves to the RewardsVault and is allocated to eligible principal. Integer rounding dust stays in the vault.
+On each V2 note, 100% of the actual fee is allocated to RewardsVaultV2 when Earn has principal; otherwise it remains backed as a pending fee in SplitPoolVault. Integer rounding dust stays in the rewards vault.
 
-**Currently, no Earn position is eligible** (the on-chain `eligiblePrincipal` reads 0 at the time of writing). Fee-charged deposits revert until at least one position is active. The site shows this warning in the Transfer panel.
+V2 note creation never pauses while Earn is empty. Fees remain backed in `SplitPoolVault.pendingFees` and are flushed after an Earn position exists.
 
 ## Security model
 
@@ -161,7 +161,7 @@ On each deposit, 100% of the actual fee moves to the RewardsVault and is allocat
 - **Fixed destination:** the recipient is part of the commitment, so copying a withdrawal transaction cannot redirect funds.
 - **Reclaim:** the depositor can reclaim an unredeemed deposit after 90 days. The fee is not refunded.
 - **No pause, no upgrades:** the contracts have no pause function and are not proxies.
-- **Owner powers:** the RewardsVault owner can change the fee collector. The owner cannot withdraw depositor principal. The owner is `0x7e8ba8a0ed567e1e048d590c27f6e0ce8e90308f`.
+- **Owner powers:** the RewardsVaultV2 owner can change the fee collector. The owner cannot withdraw pool balances, notes, or Earn principal. The owner is `0x7e8ba8a0ed567e1e048d590c27f6e0ce8e90308f`.
 - **Issuer risk:** AAPLc issuer eligibility and transfer restrictions apply. A restricted address may be unable to deposit, redeem, or withdraw.
 - **Oracle risk:** fee amounts depend on a price feed.
 

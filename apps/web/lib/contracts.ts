@@ -2,6 +2,8 @@ import type { Abi, Address } from 'viem';
 import feeManagerArtifact from './artifacts/FeeManager.json';
 import rewardsVaultArtifact from './artifacts/RewardsVault.json';
 import appleFeeVaultArtifact from './artifacts/AppleFeeVault.json';
+import rewardsVaultV2Artifact from './artifacts/RewardsVaultV2.json';
+import splitPoolVaultArtifact from './artifacts/SplitPoolVault.json';
 
 /** Base mainnet chain id. */
 export const BASE_CHAIN_ID = 8453;
@@ -14,6 +16,16 @@ export const PRICE_FEED = '0x787f13dEa48Db0897CbCDD985de77809D837F988' as Addres
 
 /** The three deployed contracts. Addresses match deployments/base-mainnet-system.json. */
 export const CONTRACTS = {
+  SplitPoolVault: {
+    address: '0x3E2b92a2b515a4cF3aFbe82FA92BD0802303C89C' as Address,
+    deployTx: '0xc323d8b54c2b898bf0eee8a754c15440d144808aad8b50d36d6674b2433191fe',
+    abi: splitPoolVaultArtifact.abi as Abi,
+  },
+  RewardsVaultV2: {
+    address: '0x7EDe3DFe8347bfab5e89fa109F2C091fBFaB278a' as Address,
+    deployTx: '0xe8dd98e7eff893769ffd05dff5839dc6f860cbbb45e95956b1ee2d20637a4ebf',
+    abi: rewardsVaultV2Artifact.abi as Abi,
+  },
   AppleFeeVault: {
     address: '0x8178B76de28E880bb1435346A4c227c0B92Bbecc' as Address,
     deployTx: '0x166dc59413c8f6b1a572607ac72cf8c88852d0d504957b68e9c76b290f52504c',
@@ -32,7 +44,8 @@ export const CONTRACTS = {
 } as const;
 
 export const APPLE_FEE_VAULT = CONTRACTS.AppleFeeVault.address;
-export const REWARDS_VAULT = CONTRACTS.RewardsVault.address;
+export const SPLIT_POOL_VAULT = CONTRACTS.SplitPoolVault.address;
+export const REWARDS_VAULT = CONTRACTS.RewardsVaultV2.address;
 export const FEE_MANAGER = CONTRACTS.FeeManager.address;
 
 /** Minimal ERC-20 surface used by the app. */
